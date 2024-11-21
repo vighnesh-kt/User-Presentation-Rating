@@ -1,5 +1,6 @@
 package com.ty.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ty.enums.Role;
 import com.ty.enums.Status;
 import jakarta.persistence.*;
@@ -39,6 +40,7 @@ public class User {
 
     // Bidirectional mapping to Presentations
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Presentation> presentations = new ArrayList<>();
 
     // Bidirectional mapping to Ratings

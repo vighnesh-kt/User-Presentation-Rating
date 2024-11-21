@@ -23,27 +23,33 @@ public class PresentationService {
 	@Autowired
 	private PresentationRepository presentationRepository;
 
+	@Autowired
 	private UserRepository userRepository;
 
 	// Assign a new presentation
 	public ResponseEntity<ResponseStructure<Presentation>> assignPresentation(Integer id, Presentation presentation) {
 		ResponseStructure<Presentation> response = new ResponseStructure<>();
-		Optional<User> user = userRepository.findById(id);
-		if (user.isPresent()) {
-			List<Presentation> p = user.get().getPresentations();
-			p.add(presentation);
-			user.get().setPresentations(p);
-			userRepository.save(user.get());
+		Optional<User> userOptional = userRepository.findById(id);
+
+		if (userOptional.isPresent()) {
+			User user = userOptional.get();
+			presentation.setUser(user);
+
 			Presentation savedPresentation = presentationRepository.save(presentation);
+
+			user.getPresentations().add(savedPresentation);
+			userRepository.save(user);
+
 			response.setStatusCode(HttpStatus.CREATED.value());
 			response.setMessage("Presentation assigned successfully");
 			response.setData(savedPresentation);
+
 			return new ResponseEntity<>(response, HttpStatus.CREATED);
+		} else {
+			response.setStatusCode(HttpStatus.NOT_FOUND.value());
+			response.setMessage("User not found");
+			return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 		}
-		response.setStatusCode(HttpStatus.NOT_FOUND.value());
-		response.setMessage("Failed");
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
-		
 	}
 
 	// Update presentation status
